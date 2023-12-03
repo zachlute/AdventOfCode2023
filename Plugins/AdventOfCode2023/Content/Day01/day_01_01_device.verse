@@ -48,6 +48,7 @@ day_01_01_device := class(creative_device):
             set Sum += Val    
         
         Print("Day 1 - Part 1 - Sum: {Sum}")
+        SetBillboardText(ToString(Sum))
     
     AsDigit(c : char)<decides><transacts> : int =
         case(c):

@@ -50,6 +50,7 @@ day_02_01_device := class(creative_device):
                     set Sum += GameNum
         
         Print("Day 2 - Part 1 - Sum: {Sum}")
+        SetBillboardText(ToString(Sum))
     
     (S: string).AsInt()<decides><transacts>: int =
         var RetInt : int := 0

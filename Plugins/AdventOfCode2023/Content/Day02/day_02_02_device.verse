@@ -46,6 +46,7 @@ day_02_02_device := class(creative_device):
                 set Sum += Power
         
         Print("Day 2 - Part 2 - Sum: {Sum}")
+        SetBillboardText(ToString(Sum))
     
     (S: string).AsInt()<decides><transacts>: int =
         var RetInt : int := 0

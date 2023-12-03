@@ -48,6 +48,7 @@ day_01_02_device := class(creative_device):
             set Sum += Val    
         
         Print("Day 1 - Part 2 - Sum: {Sum}")
+        SetBillboardText(ToString(Sum))
     
     (S:string).PrefixAsDigit(FromIdx : int)<decides><transacts> : int =
 
