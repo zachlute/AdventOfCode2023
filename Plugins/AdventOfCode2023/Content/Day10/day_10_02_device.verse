@@ -3,7 +3,7 @@ using { /Fortnite.com/Devices }
 using { /Verse.org/Simulation }
 using { /UnrealEngine.com/Temporary/Diagnostics }
 
-day_10_01_device := class(creative_device):
+day_10_02_device := class(creative_device):
 
     Input : []string := ActualInput
 
@@ -22,12 +22,57 @@ day_10_01_device := class(creative_device):
                         set S = (X, Y, 'S')
                         Print("Found starting point: {ToPathNodeString(S)}")
 
-        # Starting at the starting point, we follow the path until we get back to S
-        # We need to figure out possible path directions by searching every point around S
+        ValidPath := GetValidPath(S)
+        Print("Found valid path: {ToPathString(ValidPath)}")
 
+        # TODO: This works, but times out. Need to figure out how to solve that problem.
+        NumEnclosed := CountEnclosed(ValidPath)
+        Print("Day 10 - Part 2 - Num Enclosed: {NumEnclosed}")
+        SetBillboardText(ToString(NumEnclosed))
+
+    CountEnclosed(Path : []tuple(int, int, char))<suspends>:int =
+        var Count : int = 0
+
+        var LoopIdx : int = 0
+
+        if:
+            Width := Input[0].Length
+            Height := Input.Length
+        then:
+            # Skip the edges
+            for (X := 1..Width - 2):
+                for (Y := 1..Height - 2, Point := (X, Y, Input[Y][X])):
+                    #Print("Checking: {ToPathNodeString(Point)}")
+                    if (not Path.Find[Point]):
+                        #Print("Not on path, raycasting")
+                        set Count += RayCast(Point, Path)
+
+                    set LoopIdx += 1
+                    if (Mod[LoopIdx, 100] = 0):
+                        Sleep(0.0)
+
+        return Count
+
+    RayCast(From: tuple(int, int, char), Path : []tuple(int, int, char)):int =
+        var Count : int = 0
+        for (X := 0..From(0)):
+            if:
+                Point := (X, From(1), Input[From(1)][X])
+                Path.Find[Point]
+                Point(2) = '|' or Point(2) = '7' or Point(2) = 'F'
+            then:
+                #Print("Found path point: {ToPathNodeString(Point)}")
+                set Count += 1
+        
+        if (Mod[Count, 2] = 0):
+            0
+        else:
+            1
+
+
+    GetValidPath(S : tuple(int, int, char))<suspends>:[]tuple(int, int, char) = 
         var CandidatePaths : [][]tuple(int,int,char) := 
             for (Step : GetValidNextSteps(-1, -1, S(0), S(1), S(2))):
-                #Print("{ToPathNodeString(S)}: Found Next Step From Start {ToPathNodeString(Step)}")
                 array{(S(0), S(1), 'S')} + array{Step}
 
         var ValidPath : []tuple(int,int,char) = array{}
@@ -38,13 +83,8 @@ day_10_01_device := class(creative_device):
             var NextCandidatePaths : [][]tuple(int,int,char) = array{}
 
             for (Path : CandidatePaths, LastStep := Path[Path.Length - 1], PrevStep := Path[Path.Length - 2]):
-                #if (Path.Length > 10):
-                #    Print("Checking Path: {ToPathString(Path)}")
                 NextSteps := GetValidNextSteps(PrevStep(0), PrevStep(1), LastStep(0), LastStep(1), LastStep(2))
-                #if (Path.Length > 10):
-                #    Print("Found {ToString(NextSteps.Length)} valid next steps.")
                 for (NextStep : NextSteps):
-                    #Print("{ToPathNodeString(LastStep)}: Found Next Step {ToPathNodeString(NextStep)}")
                     NewPath := Path + array{NextStep}
                     if (NextStep(2) = 'S'):
                         # We're back at the start and we can stop.
@@ -60,16 +100,7 @@ day_10_01_device := class(creative_device):
             if (CandidatePaths.Length = 0):
                 break
 
-        Print("Found Valid Path of Length {ToString(ValidPath.Length - 1)}: {ToPathString(ValidPath)}")           
-
-        NumStepsToFarthestPos := 
-            if (Result := Floor[(ValidPath.Length - 1) * 1.0 / 2.0]):
-                Result
-            else:
-                0
-
-        Print("Day 10 - Part 1 - Num Steps: {NumStepsToFarthestPos}")
-        SetBillboardText(ToString(NumStepsToFarthestPos))
+        return ValidPath      
 
     GetValidNextSteps(PrevX : int, PrevY : int, X : int, Y : int, C : char)<transacts>:[]tuple(int,int,char) =
         var NextSteps : []tuple(int, int, char) = array{}
